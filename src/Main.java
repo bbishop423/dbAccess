@@ -3,6 +3,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
 
+import db.DbConnection;
+import db.DbType;
+
 public class Main {
 
   public static void main(String[] args) {

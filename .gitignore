@@ -6,4 +6,5 @@ bin/
 *.jar
 *.war
 *LICENSE*
+lib/
 

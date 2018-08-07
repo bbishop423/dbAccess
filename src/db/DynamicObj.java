@@ -1,3 +1,4 @@
+package db;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -13,19 +14,17 @@ public class DynamicObj {
   private int columnCount = 0;
   private ResultSet resultSet = null;
 
-  public void setupDynamicObj(ResultSet resultSet) {
+  public void setupDynamicObj(ResultSet resultSet) throws SQLException {
     this.resultSet = resultSet;
     try {
       this.metaData = this.resultSet.getMetaData();
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
     try {
       this.columnCount = this.metaData.getColumnCount();
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
     this.rows = new ArrayList<Map<String, Object>>();
   }
@@ -38,7 +37,7 @@ public class DynamicObj {
     return this.rows;
   }
 
-  public ArrayList<Map<String, Object>> processData(ResultSet rs) {
+  public ArrayList<Map<String, Object>> processData(ResultSet rs) throws SQLException {
     this.setupDynamicObj(rs);
     
     try {
@@ -52,8 +51,7 @@ public class DynamicObj {
         this.rows.add(columns);
       }
     } catch (SQLException e) {
-      System.out.println("Error: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
     return this.getRows();
   }

@@ -1,3 +1,4 @@
+package db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +18,8 @@ public class DbConnection implements AutoCloseable {
   private String connectionString = null;
   private DynamicObj dyn = new DynamicObj();
 
-  public DbConnection(DbType dbType, String ip, String port, String dbName, String userName, String password) {
+  public DbConnection(DbType dbType, String ip, String port, String dbName, String userName, String password) 
+      throws ClassNotFoundException, SQLException {
     this.setDriverNameConString(dbType, ip, port, dbName);
     try {
       Class.forName(this.driverName);
@@ -25,11 +27,9 @@ public class DbConnection implements AutoCloseable {
       this.con.setAutoCommit(false);
       this.stmt = con.createStatement();
     } catch (ClassNotFoundException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
+      throw e;
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-    } catch (Exception e) {
-      System.out.println("Unexpected Exception: " + e.toString());
+      throw e;
     }
   }
 
@@ -54,41 +54,37 @@ public class DbConnection implements AutoCloseable {
     this.con = con;
   }
 
-  public void close() {
+  public void close() throws SQLException {
     this.manualClose();
   }
 
-  public void manualClose() {
+  public void manualClose() throws SQLException {
     try {
       if (this.rs != null) {
         this.rs.close();
       }
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-    } catch (Exception e) {
-      System.out.println("Unexpected Exception: " + e.toString());
+      throw e;
     }
+    
     try {
       if (this.stmt != null) {
         this.stmt.close();
       }
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-    } catch (Exception e) {
-      System.out.println("Unexpected Exception: " + e.toString());
+      throw e;
     }
+    
     try {
       if (this.con != null) {
         this.con.close();
       }
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-    } catch (Exception e) {
-      System.out.println("Unexpected Exception: " + e.toString());
+      throw e;
     }
   }
 
-  public int runUpdate(String sql) {
+  public int runUpdate(String sql) throws SQLException {
     try {
       this.setRowsUpdated(this.stmt.executeUpdate(sql));
     } catch (SQLException e) {
@@ -96,41 +92,36 @@ public class DbConnection implements AutoCloseable {
         try {
           this.con.rollback();
         } catch (SQLException e1) {
-          System.out.println("Unexpected Exception: " + e1.toString());
-          e1.printStackTrace();
+          throw e1;
         }
       }
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
     return this.getRowsUpdated();
   }
 
-  public void commit() {
+  public void commit() throws SQLException {
     try {
       this.getCon().commit();
     } catch (SQLException e) {
       try {
         this.getCon().rollback();
       } catch (SQLException e1) {
-        System.out.println("Unexpected Exception: " + e1.toString());
-        e.printStackTrace();
+        throw e1;
       }
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
   }
 
-  public void rollback() {
+  public void rollback() throws SQLException {
     try {
       this.getCon().rollback();
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
   }
   
-  public ArrayList<ArrayList<String>> getResults() {
+  public ArrayList<ArrayList<String>> getResults() throws SQLException {
     ArrayList<ArrayList<String>> resultList = new ArrayList<ArrayList<String>>();
 
     try {
@@ -145,28 +136,30 @@ public class DbConnection implements AutoCloseable {
         resultList.add(row);
       }
     } catch (SQLException e) {
-      System.out.println("Error: " + e.toString());
+      throw e;
     }
     return resultList;
   }
 
-  public void run(String sql) {
+  public void run(String sql) throws SQLException {
     try {
       this.rs = this.stmt.executeQuery(sql);
     } catch (SQLException e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
-    } catch (Exception e) {
-      System.out.println("Unexpected Exception: " + e.toString());
-      e.printStackTrace();
+      throw e;
     }
   }
   
-  public ArrayList<ArrayList<String>> getStringResults() {
+  public ArrayList<ArrayList<String>> getStringResults() throws SQLException {
     return this.getResults();
   }
   
-  public ArrayList<Map<String, Object>> getDynamicResults() {
-    return this.dyn.processData(this.rs);
+  public ArrayList<Map<String, Object>> getDynamicResults() throws SQLException {
+    ArrayList<Map<String, Object>> results = null;
+    try {
+      results = this.dyn.processData(this.rs);
+    } catch (SQLException e) {
+      throw e;
+    }
+    return results;
   }
 }
