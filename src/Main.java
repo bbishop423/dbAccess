@@ -1,4 +1,5 @@
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
@@ -21,7 +22,7 @@ public class Main {
     try(DbConnection db = new DbConnection(DbType.ORACLE, ip, port, serviceName, userName, password)) {
       db.run("select to_char(sysdate, 'DD-MON-YY HH24:MI:SS') as \"DATE\" from dual");
       table = db.getDynamicResults();
-    } catch (Exception e) {
+    } catch (SQLException | ClassNotFoundException e) {
       System.out.println("Unexpected error: " + e.toString());
       e.printStackTrace();
     }
