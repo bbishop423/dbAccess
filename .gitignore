@@ -5,5 +5,5 @@ bin/
 *.class
 *.jar
 *.war
-LICENSE
+*LICENSE*
 
